@@ -75,6 +75,11 @@
   const standards = document.querySelector(".standards-content");
 
   function measureFilmScene() {
+    // Use layout offsets, excluding entrance/parallax transforms, to anchor the
+    // video directly beneath the CTA even on a tall screen or after font loading.
+    const content = hero.querySelector('.hero-content');
+    const gap = parseFloat(getComputedStyle(hero).getPropertyValue('--film-cover-gap'));
+    hero.style.setProperty('--film-cover-top', `${content.offsetTop + content.offsetHeight + gap}px`);
     if (!filmScene) return;
     const base = filmOrigin.getBoundingClientRect();
     const heroBottom = hero.getBoundingClientRect().bottom;
@@ -288,6 +293,7 @@
     });
   }
   function enable() {
+    measureFilmScene();
     if (preference.matches) return;
     enabled = true;
     root.classList.add("motion-enabled");
@@ -327,12 +333,14 @@
   }
   addEventListener("scroll", () => { scrollDirty = true; schedule(); }, { passive: true });
   addEventListener("resize", () => { measureFilmScene(); scrollDirty = true; schedule(); }, { passive: true });
-  new ResizeObserver(() => { if (enabled) measureFilmScene(); }).observe(hero);
+  const coverObserver = new ResizeObserver(measureFilmScene);
+  coverObserver.observe(hero);
+  coverObserver.observe(hero.querySelector('.hero-content'));
   new ResizeObserver(entries => {
     if (enabled && Math.abs(entries[0].contentRect.width - statementWidth) > .5) splitStatementLines();
   }).observe(statement);
-  document.fonts.ready.then(() => { if (enabled) splitStatementLines(); });
-  document.fonts.addEventListener("loadingdone", () => { if (enabled) splitStatementLines(); });
+  document.fonts.ready.then(() => { measureFilmScene(); if (enabled) splitStatementLines(); });
+  document.fonts.addEventListener("loadingdone", () => { measureFilmScene(); if (enabled) splitStatementLines(); });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { cancelAnimationFrame(frame); frame = 0; lastFrame = 0; }
     else { scrollDirty = true; schedule(); }
