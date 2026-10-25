@@ -58,7 +58,7 @@ button[aria-disabled="true"]{cursor:default}
   .button:not([aria-disabled="true"]):hover img{transform:translateX(3px)}
 }
 main{display:block}
-.hero{--hero-inset:16px;--film-hero-overlap:64px;min-height:max(891px,100svh);height:auto;position:relative;z-index:4;display:flex;align-items:center;padding:16px 96px 188px}
+.hero{--hero-inset:16px;--film-hero-overlap:64px;--film-cover-gap:48px;min-height:max(891px,100svh);height:auto;position:relative;z-index:4;display:flex;align-items:center;padding:16px 96px 188px}
 .hero-background{position:absolute;inset:var(--hero-inset);overflow:hidden;pointer-events:none;isolation:isolate}
 .hero-background>img{width:100%;height:100%;object-fit:cover}
 .hero-blue,.hero-fade{position:absolute;inset:0}
@@ -71,7 +71,7 @@ main{display:block}
 h1{width:1032px;max-width:100%;font-weight:600;font-size:96px;line-height:104px;letter-spacing:-4.8px}
 .hero-description{width:796px;max-width:100%;font-size:24px;line-height:30px;letter-spacing:-.72px}
 .hero-content>.button{align-self:center;width:182px}
-.film,.film-origin{position:absolute;left:calc(50% - 620px);top:calc(100% - var(--film-hero-overlap));width:1242px;height:699px}
+.film,.film-origin{position:absolute;left:calc(50% - 620px);top:var(--film-cover-top,calc(100% - var(--film-hero-overlap)));width:1242px;height:699px}
 .film-art{position:absolute;inset:0;overflow:hidden;isolation:isolate}
 .film-texture{position:absolute;height:100%;width:100.05%;left:-.03%;top:0}
 .film-photo{position:absolute;height:100%;width:103.03%;left:-.08%;top:0}
@@ -160,14 +160,14 @@ h1{width:1032px;max-width:100%;font-weight:600;font-size:96px;line-height:104px;
   .navigation{justify-content:space-between;gap:10px;font-size:12px;line-height:18px;letter-spacing:-.36px}
   .navigation>:nth-child(n){width:auto}
   .hero{height:auto;min-height:0;padding:48px 24px 112px;align-items:flex-start}
-  .hero{--hero-inset:8px;--film-hero-overlap:32px}
+  .hero{--hero-inset:8px;--film-hero-overlap:32px;--film-cover-gap:32px}
   .hero-copy{gap:24px}
   .hero-content{gap:28px}
   .eyebrow{font-size:12px;line-height:18px;letter-spacing:.6px}
   h1{width:100%;max-width:520px;font-size:clamp(40px,9vw,64px);line-height:1.083333;letter-spacing:-.05em}
   .hero-description{font-size:18px;line-height:24px;letter-spacing:-.54px}
   .button--large{font-size:18px;line-height:24px;letter-spacing:-.54px}
-  .film,.film-origin{top:calc(100% - var(--film-hero-overlap));bottom:auto;width:calc(100% - 48px);transform:translateX(-50%)}
+  .film,.film-origin{top:var(--film-cover-top,calc(100% - var(--film-hero-overlap)));bottom:auto;width:calc(100% - 48px);transform:translateX(-50%)}
   .play{transform:translate(-50%,-50%) scale(.65)}
   .standards{min-height:0;border-width:8px;padding:calc((100vw - 48px)*.5628 + 56px) 16px 56px}
   .standards-content{gap:24px}
