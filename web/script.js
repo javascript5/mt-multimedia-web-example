@@ -115,7 +115,7 @@ document.querySelectorAll("[data-pending]").forEach(control => {
   control.addEventListener("click", event => event.preventDefault());
 });
 
-/* Services start closed. Mouse hover is temporary; touch and keyboard toggle
+/* Service 01 starts expanded. Mouse hover is temporary; touch and keyboard toggle
    the same disclosure buttons. Hidden panels cannot receive keyboard focus. */
 (() => {
   const list = document.querySelector(".service-list");
@@ -162,6 +162,6 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     });
   });
   hoverPointer.addEventListener("change", () => show(null));
-  show(null);
+  show(cards[0]);
   list.classList.add("services-interactive");
 })();
