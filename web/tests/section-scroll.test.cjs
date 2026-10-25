@@ -104,7 +104,7 @@ test('visual travel stays slow while the next gesture is accepted before arrival
  await page.close();
 });
 
-test('video stays below the hero CTA on tall, short and mobile viewports',async()=>{
+test('video slightly overlaps the hero without covering its CTA across viewports',async()=>{
  const {page,errors}=await open();
  for(const reducedMotion of ['no-preference','reduce']){
   await page.emulateMedia({reducedMotion});
@@ -113,6 +113,9 @@ test('video stays below the hero CTA on tall, short and mobile viewports',async(
    await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(2100);
    const button=await page.locator('.hero-content>.button').boundingBox();
    const film=await page.locator('.film').boundingBox();
+   const hero=await page.locator('.hero').boundingBox();
+   const overlap=hero.y+hero.height-film.y;
+   assert.ok(overlap>=31&&overlap<=65,`slight overlap: ${overlap}`);
    assert.ok(film.y>=button.y+button.height+32,JSON.stringify({viewport,reducedMotion,button,film}));
    const clickable=await page.locator('.hero-content>.button').evaluate(n=>{
     const r=n.getBoundingClientRect();return r.top<innerHeight && n.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
