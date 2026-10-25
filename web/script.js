@@ -169,9 +169,9 @@ document.querySelectorAll("[data-pending]").forEach(control => {
 /* One vertical wheel gesture advances one presentation section. Long sections
    retain viewport-sized reading stops; service details keep native scrolling. */
 (() => {
-  let frame = 0, busy = false, lastWheel = -Infinity, accumulated = 0, capturedGesture = false;
-  let lastDirection = 0;
-  const quietTime = 260;
+  let frame = 0, busy = false, lastWheel = -Infinity, capturedGesture = false;
+  let lastDirection = 0, lastMagnitude = 0, targetTop = 0;
+  const quietTime = 100;
   const clampTop = top => Math.max(0, Math.min(top, document.documentElement.scrollHeight - innerHeight));
   const pageTop = node => scrollY + node.getBoundingClientRect().top;
 
@@ -202,11 +202,12 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     cancelAnimationFrame(frame);
     frame = 0;
     busy = false;
-    accumulated = 0;
     capturedGesture = false;
   }
   function move(top) {
+    cancelAnimationFrame(frame);
     cancelJourney();
+    targetTop = top;
     const start = scrollY;
     if (reducedMotion.matches) {
       scrollTo({ top, behavior: 'instant' });
@@ -215,7 +216,7 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     busy = true;
     const began = performance.now();
     function step(now) {
-      const progress = Math.min(1, (now - began) / 850);
+      const progress = Math.min(1, (now - began) / 420);
       const eased = progress * progress * (3 - 2 * progress);
       scrollTo({ top: start + (top - start) * eased, behavior: 'instant' });
       if (progress < 1) frame = requestAnimationFrame(step);
@@ -232,25 +233,28 @@ document.querySelectorAll("[data-pending]").forEach(control => {
       if (node.scrollHeight > node.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(node).overflowY)) return;
     }
     const now = performance.now();
-    const fresh = now - lastWheel > quietTime;
-    lastWheel = now;
-    if (fresh) { accumulated = 0; capturedGesture = false; }
-    // Swallow the rest of a gesture, including trackpad inertia at its destination.
-    if (busy || (!fresh && capturedGesture)) { event.preventDefault(); return; }
     const direction = Math.sign(event.deltaY);
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+    const magnitude = Math.abs(event.deltaY) * unit;
+    const fresh = now - lastWheel > quietTime || direction !== lastDirection;
+    // A new push or another wheel notch can continue immediately after arrival.
+    // Only a fading momentum tail is suppressed; it cannot hold the page locked.
+    const renewed = !busy && (event.deltaMode !== 0
+      || (magnitude >= 40 && magnitude === lastMagnitude)
+      || (magnitude >= 6 && magnitude > lastMagnitude * 1.8));
+    lastWheel = now;
+    lastDirection = direction;
+    lastMagnitude = magnitude;
+    if (fresh) capturedGesture = false;
+    if (!fresh && (busy || (capturedGesture && !renewed))) { event.preventDefault(); return; }
+    const position = busy ? targetTop : scrollY;
     const points = stops();
     const servicesTop = points[points.length - 1];
-    if (scrollY > servicesTop + 3 || (scrollY >= servicesTop - 3 && direction > 0)) return;
-    const destination = direction > 0 ? points.find(top => top > scrollY + 3)
-      : [...points].reverse().find(top => top < scrollY - 3);
+    if (!busy && (scrollY > servicesTop + 3 || (scrollY >= servicesTop - 3 && direction > 0))) return;
+    const destination = direction > 0 ? points.find(top => top > position + 3)
+      : [...points].reverse().find(top => top < position - 3);
     if (destination === undefined) return;
     event.preventDefault();
-    if (fresh || direction !== lastDirection) accumulated = 0;
-    lastDirection = direction;
-    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
-    accumulated += Math.abs(event.deltaY) * unit;
-    if (accumulated < 18) return;
-    accumulated = 0;
     capturedGesture = true;
     move(destination);
   }, { passive: false });

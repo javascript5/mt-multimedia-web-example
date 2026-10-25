@@ -42,7 +42,7 @@ for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
 test('trackpad momentum cannot advance two sections, even after arrival',async()=>{
  const {page}=await open();const t=await targets(page);
  await page.mouse.wheel(0,40);
- for(let i=0;i<15;i++){await page.waitForTimeout(80);await page.mouse.wheel(0,20);}
+ for(let i=0;i<15;i++){await page.waitForTimeout(35);await page.mouse.wheel(0,20);}
  await page.waitForTimeout(150);
  assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.film)<2);
  await page.waitForTimeout(300);await wheel(page,50);
@@ -70,4 +70,26 @@ test('reduced motion changes sections immediately, zoom and horizontal wheels re
  await wheel(page,100);
  assert.ok(await page.evaluate(()=>scrollY)>100);
  assert.deepEqual(errors,[]);await page.close();
+});
+
+test('small swipes respond and a second swipe can continue before the first finishes',async()=>{
+ const {page}=await open();const t=await targets(page);
+ await page.mouse.wheel(0,1);await page.waitForTimeout(100);
+ assert.ok(await page.evaluate(()=>scrollY)>10,'a light swipe starts moving immediately');
+ await page.waitForTimeout(30);await page.mouse.wheel(0,2);await page.waitForTimeout(850);
+ assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.about)<2,'a second swipe is not swallowed');
+ await page.close();
+});
+test('repeated wheel notches and renewed trackpad input are not locked by old momentum',async()=>{
+ const {page}=await open();const t=await targets(page);
+ await page.mouse.wheel(0,100);
+ for(let i=0;i<8;i++){await page.waitForTimeout(45);await page.mouse.wheel(0,100);}
+ await page.waitForTimeout(600);
+ assert.ok(await page.evaluate(()=>scrollY)>=t.about-2,'held wheel input continues after reaching video');
+ await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(150);
+ await page.mouse.wheel(0,15);
+ for(let i=0;i<10;i++){await page.waitForTimeout(35);await page.mouse.wheel(0,1);}
+ await page.mouse.wheel(0,20);await page.waitForTimeout(650);
+ assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.about)<2,'a renewed push during the tail advances');
+ await page.close();
 });
