@@ -29,7 +29,7 @@ for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
   await wheel(page,100);
   assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.about)<2);
   assert.equal(await page.locator('#standards-title').isVisible(),true);
-  assert.ok((await page.locator('.statement-line-content').evaluateAll(ns=>ns.map(n=>Number(getComputedStyle(n).opacity)))).every(n=>n>.99));
+  await page.waitForFunction(()=>[...document.querySelectorAll(".statement-line-content")].every(n=>Number(getComputedStyle(n).opacity)>.99),null,{timeout:4000});
   await wheel(page,100);assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.partners)<2);
   await wheel(page,100);assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.services)<2);
   await wheel(page,-100);assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.partners)<2);
@@ -122,3 +122,20 @@ test('video stays below the hero CTA on tall, short and mobile viewports',async(
  }
  assert.deepEqual(errors,[]);await page.close();
 });
+
+for(const width of [1440,390]){
+ test(`who we are reveals lines gradually after a section jump (${width})`,async()=>{
+  const {page,errors}=await open({viewport:{width,height:1000}});const t=await targets(page);
+  await page.evaluate(y=>scrollTo({top:y,behavior:'instant'}),t.about);
+  await page.waitForTimeout(500);
+  const opacity=await page.locator('.statement-line-content').evaluateAll(ns=>ns.map(n=>Number(getComputedStyle(n).opacity)));
+  assert.ok(opacity[0]>.4&&opacity.at(-1)<.1,'the first line appears before the final line');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.statement-line-content')].every(n=>Number(getComputedStyle(n).opacity)>.99),null,{timeout:4000});
+  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(400);
+  assert.ok((await page.locator('.statement-line-content').evaluateAll(ns=>ns.map(n=>Number(getComputedStyle(n).opacity)))).every(n=>n<.01),'lines reset when scrolling above the section');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(()=>!document.querySelector('.statement-line'));
+  assert.ok((await page.locator('.statement').textContent()).includes('infrastructure funds.'));
+  assert.deepEqual(errors,[]);await page.close();
+ });
+}

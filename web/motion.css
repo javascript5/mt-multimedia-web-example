@@ -39,13 +39,18 @@
   content:"";position:absolute;inset:-20px;border:1px solid rgba(255,255,255,.65);border-radius:50%;
   opacity:var(--film-active,0);scale:calc(.88 + var(--film-active,0)*.12);pointer-events:none;
 }
-/* Each measured text line rises within its own mask as it crosses the reading
-   position. No timer or whole-paragraph fade competes with the scroll. */
+/* Measured lines rise in sequence after crossing the reading position. The
+   stagger leaves time to read even when section navigation scrolls quickly. */
 .statement-line{display:block;overflow:clip}
 .statement-line-content{display:block}
 .motion-enabled .statement-line-content{
   opacity:var(--line-reveal,0);
   translate:0 calc((1 - var(--line-reveal,0))*105%);
+  transition:opacity 800ms var(--motion-ease),translate 800ms var(--motion-ease);
+  transition-delay:calc(var(--line-index,0)*220ms);
+}
+.motion-enabled .statement-line:not(.is-reading) .statement-line-content{
+  transition-duration:250ms;transition-delay:0s;
 }
 .motion-enabled .service-card{
   transform:perspective(1600px) rotateX(var(--card-rx,0deg)) rotateY(var(--card-ry,0deg));

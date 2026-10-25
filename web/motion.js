@@ -47,9 +47,10 @@
       groups[groups.length - 1].push(node);
     });
     const lines = document.createDocumentFragment();
-    statementLines = groups.map(nodes => {
+    statementLines = groups.map((nodes, index) => {
       const line = document.createElement("span");
       line.className = "statement-line";
+      line.style.setProperty("--line-index", index);
       const content = document.createElement("span");
       content.className = "statement-line-content";
       content.append(...nodes);
@@ -199,6 +200,7 @@
     linePositions.forEach(({ line, top, height }) => {
       const progress = clamp((innerHeight * .8 - top) / (height * .9));
       const eased = progress * progress * (3 - 2 * progress);
+      line.classList.toggle("is-reading", progress > 0);
       set(line, "--line-reveal", eased.toFixed(4));
     });
     scrollDirty = false;
