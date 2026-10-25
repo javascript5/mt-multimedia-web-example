@@ -165,3 +165,98 @@ document.querySelectorAll("[data-pending]").forEach(control => {
   show(cards[0]);
   list.classList.add("services-interactive");
 })();
+
+/* One vertical wheel gesture advances one presentation section. Long sections
+   retain viewport-sized reading stops; service details keep native scrolling. */
+(() => {
+  let frame = 0, busy = false, lastWheel = -Infinity, accumulated = 0, capturedGesture = false;
+  let lastDirection = 0;
+  const quietTime = 260;
+  const clampTop = top => Math.max(0, Math.min(top, document.documentElement.scrollHeight - innerHeight));
+  const pageTop = node => scrollY + node.getBoundingClientRect().top;
+
+  function stops() {
+    const filmScene = document.querySelector('.film-scroll');
+    const filmStage = document.querySelector('.film-stage');
+    const film = document.querySelector('.film');
+    const points = [0];
+    if (filmScene && filmStage) {
+      points.push(pageTop(filmScene) + (filmScene.offsetHeight - filmStage.offsetHeight) / 2);
+    } else {
+      points.push(pageTop(film) + film.offsetHeight / 2 - innerHeight / 2);
+    }
+    for (const selector of ['.standards-content', '#partners', '#services']) {
+      const node = document.querySelector(selector);
+      const top = clampTop(pageTop(node) - 48);
+      points.push(top);
+      // Do not skip text on a short window or when browser text is enlarged.
+      if (selector === '.standards-content') {
+        const end = clampTop(pageTop(node) + node.offsetHeight - innerHeight * .7);
+        for (let next = top + innerHeight * .65; next < end; next += innerHeight * .65) points.push(next);
+        if (end > top + 2) points.push(end);
+      }
+    }
+    return [...new Set(points.map(clampTop))].sort((a, b) => a - b);
+  }
+  function cancel() {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    busy = false;
+    accumulated = 0;
+    capturedGesture = false;
+  }
+  function move(top) {
+    cancelJourney();
+    const start = scrollY;
+    if (reducedMotion.matches) {
+      scrollTo({ top, behavior: 'instant' });
+      return;
+    }
+    busy = true;
+    const began = performance.now();
+    function step(now) {
+      const progress = Math.min(1, (now - began) / 850);
+      const eased = progress * progress * (3 - 2 * progress);
+      scrollTo({ top: start + (top - start) * eased, behavior: 'instant' });
+      if (progress < 1) frame = requestAnimationFrame(step);
+      else { frame = 0; busy = false; }
+    }
+    frame = requestAnimationFrame(step);
+  }
+  addEventListener('wheel', event => {
+    if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || event.shiftKey
+      || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
+    for (const node of event.composedPath()) {
+      if (!(node instanceof HTMLElement) || node === document.body || node === document.documentElement) continue;
+      if (node.matches('input,textarea,select,[contenteditable]')) return;
+      if (node.scrollHeight > node.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(node).overflowY)) return;
+    }
+    const now = performance.now();
+    const fresh = now - lastWheel > quietTime;
+    lastWheel = now;
+    if (fresh) { accumulated = 0; capturedGesture = false; }
+    // Swallow the rest of a gesture, including trackpad inertia at its destination.
+    if (busy || (!fresh && capturedGesture)) { event.preventDefault(); return; }
+    const direction = Math.sign(event.deltaY);
+    const points = stops();
+    const servicesTop = points[points.length - 1];
+    if (scrollY > servicesTop + 3 || (scrollY >= servicesTop - 3 && direction > 0)) return;
+    const destination = direction > 0 ? points.find(top => top > scrollY + 3)
+      : [...points].reverse().find(top => top < scrollY - 3);
+    if (destination === undefined) return;
+    event.preventDefault();
+    if (fresh || direction !== lastDirection) accumulated = 0;
+    lastDirection = direction;
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+    accumulated += Math.abs(event.deltaY) * unit;
+    if (accumulated < 18) return;
+    accumulated = 0;
+    capturedGesture = true;
+    move(destination);
+  }, { passive: false });
+  for (const type of ['pointerdown', 'touchstart', 'keydown', 'resize', 'popstate', 'hashchange', 'blur']) {
+    addEventListener(type, cancel, { passive: true });
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) cancel(); });
+  reducedMotion.addEventListener('change', cancel);
+})();
