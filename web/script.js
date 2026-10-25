@@ -170,7 +170,7 @@ document.querySelectorAll("[data-pending]").forEach(control => {
    retain viewport-sized reading stops; service details keep native scrolling. */
 (() => {
   let frame = 0, busy = false, lastWheel = -Infinity, capturedGesture = false;
-  let lastDirection = 0, lastMagnitude = 0, targetTop = 0;
+  let lastDirection = 0, lastMagnitude = 0, targetTop = 0, transitionStarted = -Infinity;
   const quietTime = 100;
   const clampTop = top => Math.max(0, Math.min(top, document.documentElement.scrollHeight - innerHeight));
   const pageTop = node => scrollY + node.getBoundingClientRect().top;
@@ -216,8 +216,9 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     }
     busy = true;
     const began = performance.now();
+    transitionStarted = began;
     function step(now) {
-      const progress = Math.min(1, (now - began) / 420);
+      const progress = Math.min(1, (now - began) / 850);
       const eased = progress * progress * (3 - 2 * progress);
       scrollTo({ top: start + (top - start) * eased, behavior: 'instant' });
       if (progress < 1) frame = requestAnimationFrame(step);
@@ -238,16 +239,17 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
     const magnitude = Math.abs(event.deltaY) * unit;
     const fresh = now - lastWheel > quietTime || direction !== lastDirection;
-    // A new push or another wheel notch can continue immediately after arrival.
-    // Only a fading momentum tail is suppressed; it cannot hold the page locked.
-    const renewed = !busy && (event.deltaMode !== 0
+    // Keep the accepted input cadence independent of the slower visual journey.
+    // Fresh gestures and reversals still interrupt; fading momentum stays filtered.
+    const readyForInput = !busy || now - transitionStarted >= 420;
+    const renewed = readyForInput && (event.deltaMode !== 0
       || (magnitude >= 40 && magnitude === lastMagnitude)
       || (magnitude >= 6 && magnitude > lastMagnitude * 1.8));
     lastWheel = now;
     lastDirection = direction;
     lastMagnitude = magnitude;
     if (fresh) capturedGesture = false;
-    if (!fresh && (busy || (capturedGesture && !renewed))) { event.preventDefault(); return; }
+    if (!fresh && (!readyForInput || (capturedGesture && !renewed))) { event.preventDefault(); return; }
     const position = busy ? targetTop : scrollY;
     const points = stops();
     const servicesTop = points[points.length - 1];

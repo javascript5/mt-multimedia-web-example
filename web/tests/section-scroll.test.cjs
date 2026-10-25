@@ -50,10 +50,10 @@ test('trackpad momentum cannot advance two sections, even after arrival',async()
 });
 test('services retain consecutive native wheel events and keyboard can interrupt',async()=>{
  const {page}=await open();const t=await targets(page);
- await page.evaluate(y=>scrollTo({top:y+100,behavior:'instant'}),t.services);
+ await page.evaluate(y=>scrollTo({top:y+10,behavior:'instant'}),t.services);
  const start=await page.evaluate(()=>scrollY);
- await page.mouse.wheel(0,100);await page.waitForTimeout(60);await page.mouse.wheel(0,100);await page.waitForTimeout(300);
- assert.ok(Math.abs(await page.evaluate(()=>scrollY)-start-200)<2);
+ await page.mouse.wheel(0,60);await page.waitForTimeout(60);await page.mouse.wheel(0,60);await page.waitForTimeout(300);
+ assert.ok(Math.abs(await page.evaluate(()=>scrollY)-start-120)<2);
  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(300);
  await page.mouse.wheel(0,100);await page.waitForTimeout(140);await page.keyboard.press('Escape');await page.waitForTimeout(40);
  const stopped=await page.evaluate(()=>scrollY);await page.waitForTimeout(1000);
@@ -76,7 +76,7 @@ test('small swipes respond and a second swipe can continue before the first fini
  const {page}=await open();const t=await targets(page);
  await page.mouse.wheel(0,1);await page.waitForTimeout(100);
  assert.ok(await page.evaluate(()=>scrollY)>10,'a light swipe starts moving immediately');
- await page.waitForTimeout(30);await page.mouse.wheel(0,2);await page.waitForTimeout(850);
+ await page.waitForTimeout(30);await page.mouse.wheel(0,2);await page.waitForTimeout(1000);
  assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.about)<2,'a second swipe is not swallowed');
  await page.close();
 });
@@ -84,12 +84,22 @@ test('repeated wheel notches and renewed trackpad input are not locked by old mo
  const {page}=await open();const t=await targets(page);
  await page.mouse.wheel(0,100);
  for(let i=0;i<8;i++){await page.waitForTimeout(45);await page.mouse.wheel(0,100);}
- await page.waitForTimeout(600);
+ await page.waitForTimeout(1100);
  assert.ok(await page.evaluate(()=>scrollY)>=t.about-2,'held wheel input continues after reaching video');
  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(150);
  await page.mouse.wheel(0,15);
  for(let i=0;i<10;i++){await page.waitForTimeout(35);await page.mouse.wheel(0,1);}
- await page.mouse.wheel(0,20);await page.waitForTimeout(650);
+ await page.mouse.wheel(0,20);await page.waitForTimeout(1000);
  assert.ok(Math.abs(await page.evaluate(()=>scrollY)-t.about)<2,'a renewed push during the tail advances');
+ await page.close();
+});
+
+test('visual travel stays slow while the next gesture is accepted before arrival',async()=>{
+ const {page}=await open();const t=await targets(page);
+ await page.mouse.wheel(0,100);await page.waitForTimeout(250);
+ const middle=await page.evaluate(()=>scrollY);
+ assert.ok(middle>t.film*.1&&middle<t.film*.7,'the slower journey is still underway');
+ await page.waitForTimeout(250);await page.mouse.wheel(0,100);
+ await page.waitForFunction(y=>Math.abs(scrollY-y)<2,t.about,{timeout:2500});
  await page.close();
 });
