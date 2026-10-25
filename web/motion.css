@@ -1,0 +1,88 @@
+/* Presentation motion. Original typography, layout and image paints stay in
+   styles.css. Decorative layers remain invisible without motion.js. */
+.motion-enabled [data-motion-pending]{opacity:0}
+
+.motion-enabled .hero-background>img{
+  transform:translate3d(var(--hero-pan-x,0px),var(--hero-pan-y,0px),0) scale(var(--hero-zoom,1));
+  will-change:transform;
+}
+.motion-enabled .hero-content{
+  translate:0 var(--copy-y,0px);
+  opacity:var(--copy-opacity,1);
+}
+/* The sticky stage follows native scrolling: grow, hold, shrink, release. */
+.film-origin{visibility:hidden;pointer-events:none}
+.film-scroll{position:relative;z-index:4;height:280svh;margin-top:var(--film-overlap,0px);pointer-events:none}
+.film-stage{position:sticky;top:0;width:100%;height:100svh;overflow:clip}
+.motion-enabled .film-stage .film{
+  left:50%;top:50%;bottom:auto;
+  width:var(--film-width);height:var(--film-height);aspect-ratio:auto;
+  transform:translate(-50%,-50%);translate:none;overflow:hidden;pointer-events:auto;
+  will-change:width,height;
+}
+.motion-enabled .film-stage .film-art{transform:none}
+.film-stage .film-photo{left:0;width:100%;height:100%;object-fit:cover}
+.film-scroll + .standards{padding-top:120px}
+@media(max-width:700px){.film-scroll + .standards{padding-top:64px}}
+
+.motion-enabled .film-art{
+  transform:perspective(1500px) rotateX(var(--film-rx,0deg)) rotateY(var(--film-ry,0deg)) scale(var(--film-scale,1));
+  box-shadow:0 28px 60px -32px rgba(18,22,61,var(--film-shadow,0));
+}
+.film-art::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--film-active,0);
+  background:radial-gradient(ellipse 55% 65% at var(--film-light-x,50%) var(--film-light-y,50%),rgba(255,255,255,.26),transparent 70%);
+  mix-blend-mode:screen;
+}
+.motion-enabled .play{translate:var(--play-x,0px) var(--play-y,0px)}
+.play::before{
+  content:"";position:absolute;inset:-20px;border:1px solid rgba(255,255,255,.65);border-radius:50%;
+  opacity:var(--film-active,0);scale:calc(.88 + var(--film-active,0)*.12);pointer-events:none;
+}
+/* Each measured text line rises within its own mask as it crosses the reading
+   position. No timer or whole-paragraph fade competes with the scroll. */
+.statement-line{display:block;overflow:clip}
+.statement-line-content{display:block}
+.motion-enabled .statement-line-content{
+  opacity:var(--line-reveal,0);
+  translate:0 calc((1 - var(--line-reveal,0))*105%);
+}
+.motion-enabled .service-card{
+  transform:perspective(1600px) rotateX(var(--card-rx,0deg)) rotateY(var(--card-ry,0deg));
+  box-shadow:0 22px 48px -28px rgba(18,22,61,var(--card-shadow,0));
+}
+.motion-enabled .service-image{
+  transform:translate3d(var(--card-pan-x,0px),var(--card-pan-y,0px),0) scale(var(--card-zoom,1));
+}
+.service-art::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  opacity:var(--card-active,0);
+  background:radial-gradient(ellipse 520px 320px at var(--card-light-x,50%) var(--card-light-y,50%),rgba(255,255,255,.26),transparent 70%);
+  mix-blend-mode:screen;
+}
+.motion-enabled .service-number{translate:calc(var(--card-active,0)*-6px) 0;opacity:calc(.3 + var(--card-active,0)*.7)}
+.motion-enabled .service-copy h3{translate:calc(var(--card-active,0)*5px) 0}
+
+@media(hover:hover) and (pointer:fine){
+  /* In a client prototype, all existing CTAs can demonstrate tactile feedback,
+     including actions whose destinations are intentionally not connected. */
+  .motion-enabled .button{position:relative;isolation:isolate;overflow:hidden}
+  .motion-enabled .button::before{
+    content:"";position:absolute;z-index:-1;inset:0;background:rgba(255,255,255,.16);
+    transform:translateX(-102%);transition:transform 450ms var(--motion-ease);pointer-events:none;
+  }
+  .motion-enabled .button:hover::before{transform:translateX(0)}
+  .motion-enabled .button:hover img,.motion-enabled .service-card.is-hovered .button img{transform:translateX(5px)}
+  .motion-enabled .button--white::before{background:rgba(40,40,255,.08)}
+  .motion-enabled .partner img{transition:translate 500ms var(--motion-ease),filter 500ms var(--motion-ease)}
+  .motion-enabled .partner:hover img{translate:0 -7px;filter:grayscale(0)}
+}
+@media(max-width:700px){
+  .play::before{inset:-12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .motion-enabled [data-motion-pending]{opacity:revert}
+  .motion-enabled .hero-background>img,.motion-enabled .film-art,.motion-enabled .service-card,.motion-enabled .service-image{transform:none;will-change:auto}
+  .motion-enabled .hero-content,.motion-enabled .film,.motion-enabled .play{translate:none;opacity:1}
+  .motion-enabled .statement-line-content{opacity:1;translate:none}
+}

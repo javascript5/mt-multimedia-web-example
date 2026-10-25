@@ -1,0 +1,14 @@
+# Publish only the standalone website and its supporting assets.
+/*
+!/.gitignore
+!/README.md
+!/web/
+/web/*
+!/web/index.html
+!/web/styles.css
+!/web/motion.css
+!/web/script.js
+!/web/motion.js
+!/web/.nojekyll
+!/web/assets/
+.DS_Store
