@@ -6,6 +6,8 @@ A responsive landing-page concept for MT Multimedia, built with HTML, CSS and Ja
 
 Vertical mouse-wheel and trackpad gestures advance through Hero, Video, Who We Are, Partners and Services. Light swipes respond immediately, transitions take about 420 ms, and fresh input can continue or reverse a transition; the video fills the viewport at its stop. Services retain normal scrolling so all details remain reachable. Touch and keyboard retain native navigation, and reduced motion uses immediate section changes.
 
+Hero, Video, Who We Are and Our Services occupy at least one viewport in height. Our Partners keeps its content-based height.
+
 Service 01 is expanded when the page first opens; the other services expand on hover or tap.
 
 This is a design prototype. Contact, news and video controls are placeholders.

@@ -17,7 +17,7 @@ async function wheel(page,delta){await page.mouse.wheel(0,delta);await page.wait
 async function targets(page){return page.evaluate(()=>{
  const scene=document.querySelector('.film-scroll'),stage=document.querySelector('.film-stage');
  const top=n=>scrollY+n.getBoundingClientRect().top;
- return {film:scene?top(scene)+(scene.offsetHeight-stage.offsetHeight)/2:null,about:top(document.querySelector('.standards-content'))-48,partners:top(document.querySelector('#partners'))-48,services:top(document.querySelector('#services'))-48};
+ return {film:scene?top(scene)+(scene.offsetHeight-stage.offsetHeight)/2:null,about:top(document.querySelector('#about')),partners:top(document.querySelector('#partners'))-48,services:top(document.querySelector('#services'))};
 });}
 for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
  test(`one gesture each: hero, full-screen video, who we are, reverse (${viewport.width})`,async()=>{
