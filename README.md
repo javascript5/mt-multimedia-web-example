@@ -8,7 +8,7 @@ Vertical mouse-wheel and trackpad gestures advance through Hero, Video, Who We A
 
 Who We Are reveals each text line over 800 ms with a 220 ms stagger, so section navigation leaves a readable line-by-line entrance. Reduced motion displays the text immediately.
 
-Hero, Video, Who We Are and Our Services occupy at least one viewport in height. Our Partners keeps its content-based height.
+On desktop, Hero, Video, Who We Are and Our Services occupy at least one viewport in height. On mobile, Hero, Who We Are and Our Services follow their content height with compact spacing; the video still expands to fill the viewport, with a shorter scroll scene. Our Partners keeps its content-based height.
 
 Service 01 is expanded when the page first opens; the other services expand on hover or tap.
 

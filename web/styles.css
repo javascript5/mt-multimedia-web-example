@@ -154,12 +154,12 @@ h1{width:1032px;max-width:100%;font-weight:600;font-size:96px;line-height:104px;
   .service-card{padding:36px}
 }
 @media(max-width:700px){
-  .header{padding:20px 16px;gap:20px 8px}
-  .brand{width:auto;font-size:18px;line-height:24px;letter-spacing:-.9px}
+  .header{padding:16px;gap:16px 8px}
+  .brand{width:auto;font-size:clamp(16px,4.6vw,18px);line-height:24px;letter-spacing:-.9px}
   .header>.button{width:auto;padding:8px 12px;font-size:13px;line-height:20px}
   .navigation{justify-content:space-between;gap:10px;font-size:12px;line-height:18px;letter-spacing:-.36px}
   .navigation>:nth-child(n){width:auto}
-  .hero{height:auto;min-height:max(660px,100svh);padding:70px 24px 190px;align-items:flex-start}
+  .hero{height:auto;min-height:0;padding:48px 24px 112px;align-items:flex-start}
   .hero{--hero-inset:8px;--film-hero-overlap:32px}
   .hero-copy{gap:24px}
   .hero-content{gap:28px}
@@ -169,14 +169,14 @@ h1{width:1032px;max-width:100%;font-weight:600;font-size:96px;line-height:104px;
   .button--large{font-size:18px;line-height:24px;letter-spacing:-.54px}
   .film,.film-origin{top:calc(100% - var(--film-hero-overlap));bottom:auto;width:calc(100% - 48px);transform:translateX(-50%)}
   .play{transform:translate(-50%,-50%) scale(.65)}
-  .standards{border-width:8px;padding:calc((100vw - 48px)*.5628 + 64px) 16px 72px}
+  .standards{min-height:0;border-width:8px;padding:calc((100vw - 48px)*.5628 + 56px) 16px 56px}
   .standards-content{gap:24px}
   .statement{font-size:clamp(28px,6vw,40px);line-height:1.26;letter-spacing:-.05em}
   .partners{padding:28px 24px;gap:16px;flex-direction:column;align-items:flex-start}
   .partners h2{font-size:24px;line-height:1.26;letter-spacing:-1.2px}
   .partner-logos{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .partner{width:100%;max-width:220px;justify-self:center}
-  .services{padding:64px 24px;gap:32px}
+  .services{min-height:0;padding:48px 24px;gap:28px;justify-content:flex-start}
   .services-header{flex-direction:column;align-items:flex-start;gap:24px}
   .services-intro{width:100%}
   .services-header>.button{align-self:flex-start}

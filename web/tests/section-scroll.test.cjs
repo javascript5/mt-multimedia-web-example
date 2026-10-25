@@ -142,3 +142,21 @@ for(const width of [1440,390]){
   assert.deepEqual(errors,[]);await page.close();
  });
 }
+
+test('compact mobile pages start at the hero without jumping when the video scene mounts',async()=>{
+ for(const viewport of [{width:320,height:640},{width:390,height:844},{width:430,height:932}]){
+  const {page,errors}=await open({viewport});
+  await page.waitForTimeout(2100);
+  assert.equal(await page.evaluate(()=>scrollY),0,'first load stays at the top');
+  const bounds=await page.evaluate(()=>{
+   const h=document.querySelector('.hero').getBoundingClientRect(),b=document.querySelector('.hero-content>.button').getBoundingClientRect(),a=document.querySelector('#about').getBoundingClientRect();
+   return {gap:h.bottom-b.bottom,aboutHeight:a.height,overflow:document.documentElement.scrollWidth>innerWidth};
+  });
+  assert.ok(bounds.gap<=114&&bounds.aboutHeight<viewport.height&&!bounds.overflow,'no full-screen empty sections');
+  await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(()=>scrollY),0);
+  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(()=>scrollY),0);
+  assert.deepEqual(errors,[]);await page.close();
+ }
+});
