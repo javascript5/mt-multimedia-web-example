@@ -103,3 +103,22 @@ test('visual travel stays slow while the next gesture is accepted before arrival
  await page.waitForFunction(y=>Math.abs(scrollY-y)<2,t.about,{timeout:2500});
  await page.close();
 });
+
+test('video stays below the hero CTA on tall, short and mobile viewports',async()=>{
+ const {page,errors}=await open();
+ for(const reducedMotion of ['no-preference','reduce']){
+  await page.emulateMedia({reducedMotion});
+  for(const viewport of [{width:1920,height:1440},{width:1440,height:1000},{width:1024,height:768},{width:701,height:600},{width:390,height:844},{width:320,height:640}]){
+   await page.setViewportSize(viewport);await page.goto(process.env.MT_TEST_URL||'http://127.0.0.1:4173/');
+   await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(2100);
+   const button=await page.locator('.hero-content>.button').boundingBox();
+   const film=await page.locator('.film').boundingBox();
+   assert.ok(film.y>=button.y+button.height+32,JSON.stringify({viewport,reducedMotion,button,film}));
+   const clickable=await page.locator('.hero-content>.button').evaluate(n=>{
+    const r=n.getBoundingClientRect();return r.top<innerHeight && n.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
+   });
+   if(button.y+button.height<viewport.height)assert.ok(clickable,'video does not cover the CTA hit area');
+  }
+ }
+ assert.deepEqual(errors,[]);await page.close();
+});
