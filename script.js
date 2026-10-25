@@ -185,13 +185,14 @@ document.querySelectorAll("[data-pending]").forEach(control => {
     } else {
       points.push(pageTop(film) + film.offsetHeight / 2 - innerHeight / 2);
     }
-    for (const selector of ['.standards-content', '#partners', '#services']) {
+    for (const selector of ['#about', '#partners', '#services']) {
       const node = document.querySelector(selector);
-      const top = clampTop(pageTop(node) - 48);
+      const top = clampTop(pageTop(node) - (selector === '#partners' ? 48 : 0));
       points.push(top);
       // Do not skip text on a short window or when browser text is enlarged.
-      if (selector === '.standards-content') {
-        const end = clampTop(pageTop(node) + node.offsetHeight - innerHeight * .7);
+      if (selector === '#about') {
+        const content = node.querySelector('.standards-content');
+        const end = clampTop(pageTop(content) + content.offsetHeight - innerHeight * .7);
         for (let next = top + innerHeight * .65; next < end; next += innerHeight * .65) points.push(next);
         if (end > top + 2) points.push(end);
       }
