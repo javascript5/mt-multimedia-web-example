@@ -103,7 +103,7 @@
     measureFilmScene();
     paintFilmScene(0);
     // Preserve the reader's position if motion is enabled farther down the page.
-    if (previousTop < innerHeight) scrollBy({ top: standards.getBoundingClientRect().top - previousTop, behavior: "instant" });
+    if (scrollY > 1 && previousTop < innerHeight) scrollBy({ top: standards.getBoundingClientRect().top - previousTop, behavior: "instant" });
   }
   function unmountFilmScene() {
     if (!filmScene) return;
@@ -114,7 +114,7 @@
     filmOrigin.replaceWith(film);
     filmScene.remove();
     filmScene = filmStage = filmOrigin = null;
-    if (previousTop < innerHeight) scrollBy({ top: standards.getBoundingClientRect().top - previousTop, behavior: "instant" });
+    if (scrollY > 1 && previousTop < innerHeight) scrollBy({ top: standards.getBoundingClientRect().top - previousTop, behavior: "instant" });
     else if (wasInScene) film.scrollIntoView({ block: "center", behavior: "instant" });
     focused?.focus({ preventScroll: true });
   }
