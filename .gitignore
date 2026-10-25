@@ -12,3 +12,7 @@
 !/web/.nojekyll
 !/web/assets/
 .DS_Store
+
+!/web/tests/
+/web/tests/*
+!/web/tests/section-scroll.test.cjs

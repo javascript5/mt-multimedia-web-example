@@ -1,4 +1,4 @@
-/* Client presentation choreography: native scroll, finite entrances, and one
+/* Client presentation choreography: scroll-driven scenes, finite entrances, and one
    shared pointer/parallax frame. There is no animation loop while idle. */
 (() => {
   const preference = matchMedia("(prefers-reduced-motion: reduce)");
